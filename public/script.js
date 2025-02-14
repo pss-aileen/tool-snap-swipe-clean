@@ -7,6 +7,17 @@ async function fetchImages() {
   images = await response.json();
   console.log(images);
   showImage();
+
+  const allImagesElement = document.getElementById('allImages');
+
+  images.map((imgUrl, index) => {
+    const li = document.createElement('li');
+    const img = document.createElement('img');
+    img.src = `./images/${images[index]}`;
+
+    li.appendChild(img);
+    allImagesElement.appendChild(li);
+  });
 }
 
 function showImage() {
@@ -44,7 +55,7 @@ document.getElementById('delete-selected').addEventListener('click', async () =>
   const result = await response.json();
   alert(result.message);
   toDelete = [];
-  fetchImages(); // 画像リストを更新
+  fetchImages();
 });
 
 // 初回読み込み
