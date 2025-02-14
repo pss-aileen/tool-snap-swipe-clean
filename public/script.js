@@ -8,9 +8,12 @@ async function fetchImages() {
   console.log(images);
   showImage();
 
+  const response2 = await fetch('/get-thumbnails');
+  let thumbnails = await response2.json();
+
   const allImagesElement = document.getElementById('allImages');
 
-  images.map((imgUrl, index) => {
+  thumbnails.map((imgUrl, index) => {
     const li = document.createElement('li');
     const img = document.createElement('img');
     img.src = `./images/${images[index]}`;

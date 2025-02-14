@@ -64,17 +64,21 @@ ul {
   }
 
   .pictures {
+    height: 90vh;
+    overflow: scroll;
     img {
       width: 100%;
       height: auto;
     }
 
     #allImages {
+      display: flex;
       padding: 0;
       list-style: none;
-      width: 80px;
+      flex-wrap: wrap;
 
       img {
+        width: 80px;
         border: 1px solid;
         aspect-ratio: 4/3;
         object-fit: cover;
