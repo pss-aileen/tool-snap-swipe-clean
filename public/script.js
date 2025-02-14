@@ -16,7 +16,7 @@ async function fetchImages() {
   thumbnails.map((imgUrl, index) => {
     const li = document.createElement('li');
     const img = document.createElement('img');
-    img.src = `./images/${images[index]}`;
+    img.src = `./thumbnails/${thumbnails[index]}`;
 
     li.appendChild(img);
     allImagesElement.appendChild(li);

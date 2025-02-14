@@ -1,5 +1,6 @@
 const express = require('express');
 const fs = require('fs');
+const fsPromises = require('fs').promises; // ✅ fs.promises を使用
 const path = require('path');
 const sharp = require('sharp');
 
@@ -20,25 +21,29 @@ async function generateThumbnails() {
     fs.mkdirSync(THUMB_DIR);
   }
 
-  const files = await fs.readdir(IMAGE_DIR);
-  for (const file of files) {
-    const inputPath = path.join(IMAGE_DIR, file);
-    const outputPath = path.join(THUMB_DIR, file);
+  try {
+    const files = await fsPromises.readdir(IMAGE_DIR); // ✅ fs.promises.readdir を使用
+    for (const file of files) {
+      const inputPath = path.join(IMAGE_DIR, file);
+      const outputPath = path.join(THUMB_DIR, file);
 
-    // .DS_Store 除外
-    if (file === '.DS_Store') continue;
+      // .DS_Store 除外
+      if (file === '.DS_Store') continue;
 
-    // すでにサムネイルがあればスキップ
-    if (fs.existsSync(outputPath)) continue;
+      // すでにサムネイルがあればスキップ
+      if (fs.existsSync(outputPath)) continue;
 
-    try {
-      await sharp(inputPath)
-        .resize(150, 150) // 幅150px、高さ150px
-        .toFile(outputPath);
-      console.log(`サムネイル生成: ${file}`);
-    } catch (err) {
-      console.error(`サムネイル生成失敗: ${file}`, err);
+      try {
+        await sharp(inputPath)
+          .resize(150, 150) // 幅150px、高さ150px
+          .toFile(outputPath);
+        console.log(`サムネイル生成: ${file}`);
+      } catch (err) {
+        console.error(`サムネイル生成失敗: ${file}`, err);
+      }
     }
+  } catch (err) {
+    console.error('画像フォルダの読み込みに失敗:', err);
   }
 }
 
@@ -46,7 +51,7 @@ async function generateThumbnails() {
 app.get('/get-thumbnails', async (req, res) => {
   try {
     await generateThumbnails(); // 必要に応じてサムネイルを生成
-    const files = await fs.readdir(THUMB_DIR);
+    const files = await fsPromises.readdir(THUMB_DIR); // ✅ 修正
     res.json(files.filter((file) => file !== '.DS_Store'));
   } catch (err) {
     res.status(500).json({ error: 'サムネイルの取得に失敗しました' });
@@ -58,16 +63,17 @@ generateThumbnails().then(() => {
   app.listen(3000, () => console.log('Server running on http://localhost:3000'));
 });
 
+// // サーバー起動
+// app.listen(3000, () => console.log('Server running on http://localhost:3000'));
+
 // 📌 画像一覧を取得するAPI
-app.get('/get-images', (req, res) => {
-  fs.readdir(IMAGE_DIR, (err, files) => {
-    if (err) {
-      return res.status(500).json({ error: 'Failed to load images' });
-    }
-    // .DS_Store を除外
-    const filteredFiles = files.filter((file) => file !== '.DS_Store');
-    res.json(filteredFiles);
-  });
+app.get('/get-images', async (req, res) => {
+  try {
+    const files = await fsPromises.readdir(IMAGE_DIR); // ✅ 修正
+    res.json(files.filter((file) => file !== '.DS_Store'));
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load images' });
+  }
 });
 
 // 📌 画像をゴミ箱フォルダに移動するAPI
@@ -89,6 +95,3 @@ app.post('/delete-images', (req, res) => {
 
   res.json({ message: '選択した画像をゴミ箱に移動しました！' });
 });
-
-// サーバー起動
-app.listen(3000, () => console.log('Server running on http://localhost:3000'));
